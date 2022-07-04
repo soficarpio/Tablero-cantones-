@@ -14,7 +14,7 @@ library(flexdashboard)
 library(dplyr)
 library(sf)
 library(leaflet)
-
+library(DT)
 ```
 
 ```{r lectura-datos, message=FALSE, warning=FALSE}
@@ -40,15 +40,28 @@ leaflet()%>%
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### Chart B
+### Tabla 
 
-```{r}
-
+```{r Tabla}
+cantones %>%
+  select(provincia, canton, area) %>%
+  datatable(options = list(
+    pageLength = 7,
+    language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
+  ))
 ```
 
-### Chart C
+### Mapa Leaflet 
 
-```{r}
-
+```{r mapa_leaflet}
+leaflet() %>%
+  addTiles(group = "OpenStreetMap") %>% 
+  addPolygons( 
+    data = cantones,
+    color = "black",
+    fillColor = "transparent",
+    stroke = TRUE,
+    weight = 1.0,
+  )
 ```
 

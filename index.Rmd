@@ -15,6 +15,8 @@ library(dplyr)
 library(sf)
 library(leaflet)
 library(DT)
+library(ggplot2)
+library(plotly)
 ```
 
 ```{r lectura-datos, message=FALSE, warning=FALSE}
@@ -25,43 +27,57 @@ cantones <-
 
 
 
-Column {data-width=650}
+Column {data-width=550}
 -----------------------------------------------------------------------
 
 ### Mapa de cantones 
 
-```{r}
-leaflet()%>% 
+```{r mapa_leaflet, message=FALSE, warning=FALSE}
+leaflet() %>%
   addTiles() %>% 
-  addPolygons(data = cantones, weight = 1.0)
-
+  addPolygons( 
+    data = cantones,
+    color = "red",
+    weight = 1.0,
+  )
 ```
 
-Column {data-width=350}
+Column {data-width=450}
 -----------------------------------------------------------------------
 
 ### Tabla 
 
-```{r Tabla}
+```{r Tabla, message=FALSE, warning=FALSE}
 cantones %>%
+  st_drop_geometry() %>% 
   select(provincia, canton, area) %>%
-  datatable(options = list(
+  arrange(desc(area)) %>% 
+  datatable(
+    colnames = c("Provincia", "Cantón", "Área (km2)"), 
+    options = list(
     pageLength = 7,
     language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
   ))
 ```
 
-### Mapa Leaflet 
+### Gráfico  
 
-```{r mapa_leaflet}
-leaflet() %>%
-  addTiles(group = "OpenStreetMap") %>% 
-  addPolygons( 
-    data = cantones,
-    color = "black",
-    fillColor = "transparent",
-    stroke = TRUE,
-    weight = 1.0,
-  )
+```{r gráfico_barras, message=FALSE, warning=FALSE}
+ggplot2_grafico_cantones <-
+cantones %>%
+  st_drop_geometry() %>% 
+  slice_max(area, n = 10) %>% 
+  ggplot(aes(x = reorder(canton, area), y = area)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Área de cada cantón") +
+  xlab("Cantón") +
+  ylab("Área") +
+  coord_flip() 
+
+ggplotly(ggplot2_grafico_cantones) %>% config(locale = 'es')
 ```
+
+
+
+
 
